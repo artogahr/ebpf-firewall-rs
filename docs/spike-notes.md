@@ -151,3 +151,30 @@ DEMO TECHNIQUE (important for the talk): block a process by a STABLE, KNOWN PID.
 the shell's own PID: `: <>/dev/tcp/HOST/PORT` runs connect() in the current shell
 process (PID = `echo $$`). So the demo is "this shell's PID is N; block N; now THIS
 shell cannot open connections". Used a detached bash loop hitting /dev/tcp for testing.
+
+## Verifier example (Plan 3, Task 1) - VERIFIED
+Goal: a snippet that compiles+links but the KERNEL VERIFIER rejects at load, for the
+verifier teaching segment. Findings on kernel 7.0.10 (modern, strong verifier):
+- Candidate A (u64 runtime-bounded loop): FAILS AT LINK (bpf-linker), not verifier:
+  "A call to built-in function '__multi3' is not supported" / "only small returns
+  supported". 64-bit math. Wrong kind of failure (link, not load). Rejected as example.
+- Candidate A' (u32 unbounded `while i < n` loop): LOADS FINE. The modern verifier proves
+  the bounded loop terminates. Not a verifier trip.
+- aya's `HashMap::get`/`get_ptr` both return Option (null-checked by aya), so the classic
+  "forgot the null check" verifier error cannot be reproduced via the safe API.
+- WINNER - genuine infinite loop:
+  ```rust
+  #[cgroup_sock_addr(connect4)]
+  pub fn connect4(_ctx: SockAddrContext) -> i32 {
+      loop { unsafe { bpf_printk!(c"spinning forever") }; }
+  }
+  ```
+  Compiles and links cleanly; the kernel verifier REJECTS at `program.load()` with:
+  ```
+  infinite loop detected at insn 4
+  processed 12 insns (limit 1000000) ...
+  Caused by: Invalid argument (os error 22)   # EINVAL
+  ```
+  Plus a full register/instruction-trace dump. This is the instructor-notes verifier
+  example. Teaching point: fails at LOAD (verifier), not compile; verifier guarantees
+  termination; the dump is your debugging tool.
