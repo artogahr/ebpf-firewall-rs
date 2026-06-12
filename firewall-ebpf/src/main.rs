@@ -1,12 +1,17 @@
 #![no_std]
 #![no_main]
 
-use aya_ebpf::{helpers::bpf_printk, macros::cgroup_sock_addr, programs::SockAddrContext};
+use aya_ebpf::{
+    helpers::{bpf_get_current_pid_tgid, bpf_printk},
+    macros::cgroup_sock_addr,
+    programs::SockAddrContext,
+};
 
 #[cgroup_sock_addr(connect4)]
 pub fn connect4(_ctx: SockAddrContext) -> i32 {
-    unsafe { bpf_printk!(c"connect4: a process is connecting") };
-    1 // 1 = allow the connection, 0 = deny
+    let pid = (bpf_get_current_pid_tgid() >> 32) as u32;
+    unsafe { bpf_printk!(c"connect4: pid %d is connecting", pid) };
+    1 // allow
 }
 
 #[cfg(not(test))]
