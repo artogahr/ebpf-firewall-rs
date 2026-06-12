@@ -14,8 +14,6 @@ async fn main() -> anyhow::Result<()> {
         "/firewall"
     )))?;
 
-    // Each argument is either an IPv4 address (block that destination) or a process
-    // name (block that program).
     let mut block_names: Vec<[u8; 16]> = Vec::new();
     let mut block_ips: Vec<u32> = Vec::new();
     for arg in std::env::args().skip(1) {
@@ -50,6 +48,11 @@ async fn main() -> anyhow::Result<()> {
     let program: &mut CgroupSockAddr = ebpf.program_mut("connect4").unwrap().try_into()?;
     program.load()?;
     program.attach(&cgroup, CgroupAttachMode::Single)?;
+
+    // Also cover IPv6 so IPv6-capable apps can't bypass the rule.
+    let program6: &mut CgroupSockAddr = ebpf.program_mut("connect6").unwrap().try_into()?;
+    program6.load()?;
+    program6.attach(&cgroup, CgroupAttachMode::Single)?;
 
     println!("firewall attached. Press Ctrl-C to exit.");
     signal::ctrl_c().await?;
