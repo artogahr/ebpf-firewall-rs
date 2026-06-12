@@ -133,6 +133,16 @@ per-packet version and the content for the longer workshop variant.
 - The `hello-world` eBPF program for the setup-check segment (Step 0), on `main`.
 - A **welcoming participant `README`** written for both workshop attendees and future
   readers who find the repo later: what this is, how to set up, and the staged tasks.
+- **README progress convention (self-locating branches):**
+  - On `main`, the README shows the **full ladder as a checklist**, with every step
+    branch linked and the setup/homework instructions. This is the map of the whole
+    workshop.
+  - On each step branch, the README opens with a **progress header** that shows where
+    you are, for example: `Step 3 of 5  |  done: 0, 1, 2  |  >> you are here <<  |
+    next: Step 4`. Below it: a short "what you'll learn in this step" blurb, the task,
+    and a one-line command to jump to the next checkpoint. Every branch is therefore
+    self-locating, so a participant who checks out a branch cold always knows where
+    they are and where to go next.
 - Separate **instructor notes**: homework instructions, timing, talking points, and an
   **optional** "if you are running this for a crowd, set up a local Nix cache on your
   laptop like so" section (the `harmonia` LAN-cache trick), framed as bandwidth
