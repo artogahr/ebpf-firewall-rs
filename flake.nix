@@ -43,7 +43,7 @@
           '';
         };
 
-        # Guest shell (inside the Linux VM): the eBPF/Rust toolchain.
+        # Guest shell (inside the Linux VM): the full eBPF/Rust toolchain, used to BUILD.
         guestShell = pkgs.mkShell {
           packages = [
             rustNightly
@@ -52,16 +52,19 @@
             pkgs.pkg-config
           ];
         };
+
+        # Host editing shell: rust + rust-src + rust-analyzer, no bpf-linker. The project
+        # can't be built on a non-Linux host, but it CAN be analyzed/cross-checked, so this
+        # gives editor language features. Builds instantly on macOS (no LLVM/bpf-linker).
+        analyzerShell = pkgs.mkShell { packages = [ rustNightly ]; };
       in {
-        # Default = guest toolchain (typed most often, inside the VM).
-        # `.#host` = the one-time laptop bootstrap that provides Lima.
-        devShells.default = guestShell;
-        devShells.host = hostShell;
-        devShells.guest = guestShell;
-        # Lean host toolchain (nightly + rust-src + rust-analyzer) for editor language
-        # features on the host (e.g. macOS), where the project cannot be built but CAN be
-        # analyzed and cross-checked. See the README "Editor autocomplete" section.
-        devShells.analyzer = pkgs.mkShell { packages = [ rustNightly ]; };
+        # `nix develop` does the right thing per platform: on macOS (a host) you get the
+        # editing toolchain; on Linux (the guest, or a Linux laptop) you get the full build
+        # toolchain. So a plain `nix develop` works everywhere with no flags.
+        devShells.default = if pkgs.stdenv.isDarwin then analyzerShell else guestShell;
+        devShells.host = hostShell;       # lima only, for booting the guest manually
+        devShells.guest = guestShell;     # force the full build toolchain anywhere
+        devShells.analyzer = analyzerShell;
 
         # VM lifecycle as flake apps, so the host commands are pure Nix:
         #   nix run .#start    boot the guest

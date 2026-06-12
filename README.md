@@ -51,26 +51,22 @@ repo somewhere under your home directory so the guest's mount can see it.
 ## Editor autocomplete on your laptop (optional)
 
 You can't *build* this project on macOS (the eBPF toolchain is Linux-only), but you can
-still get rust-analyzer language features on your host. The toolchain lives in the flake,
-so your editor must see it on `PATH`. Two ways:
+still get rust-analyzer language features on your host. `nix develop` already gives the
+right toolchain per platform (editing tools on macOS, the full build toolchain on Linux),
+so your editor just needs to see it on `PATH`. Two ways:
 
-**A. Launch your editor from the toolchain shell** (simplest; quit the editor first so it
-doesn't reattach with the old environment):
+**A. Launch your editor from the shell** (simplest; quit it first so it doesn't reattach
+with the old environment):
 ```bash
 cd <repo>
-nix develop .#analyzer     # nightly + rust-src + rust-analyzer (no build needed)
-zed .                      # or: code .  /  nvim  /  $EDITOR
+nix develop          # rust + rust-src + rust-analyzer (instant on macOS, no bpf-linker)
+zed .                # or: code .  /  nvim  /  $EDITOR
 ```
 
 **B. direnv (automatic).** A committed `.envrc` loads the toolchain whenever you enter the
-repo. Install it once and your editor picks it up:
-```bash
-nix profile install nixpkgs#direnv nixpkgs#nix-direnv
-# hook direnv into your shell + nix-direnv (see direnv docs), then:
-direnv allow
-```
-Note: a GUI editor opened from the dock has a minimal `PATH` and may not find `direnv`;
-launching from a terminal (option A, or `zed .` after `direnv allow`) avoids that.
+repo: `nix profile install nixpkgs#direnv nixpkgs#nix-direnv`, hook it into your shell,
+then `direnv allow`. (A GUI editor opened from the dock has a minimal `PATH` and may not
+find `direnv`; launching from a terminal avoids that.)
 
 With the toolchain on PATH:
 
