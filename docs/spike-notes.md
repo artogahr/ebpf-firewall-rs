@@ -194,3 +194,12 @@ verifier teaching segment. Findings on kernel 7.0.10 (modern, strong verifier):
 - CI (.github/workflows/ci.yml) on main and all step branches: builds each branch with
   `nix develop .#guest`. solution tag -> step-6. README links instructor notes.
 - All three plans (foundation, step ladder, docs+CI) complete and verified.
+
+## CI x86 verification (Plan 3 follow-up)
+- First x86_64 CI run (all 7 branches) FAILED uniformly: aya-build found rustup on the
+  GitHub runner and demanded a rustup-managed nightly ("toolchain nightly-x86_64... not
+  installed"). NOT an x86 problem; the build died at toolchain detection before the
+  eBPF compile. Nix guest has no rustup, so participants are unaffected.
+- FIX: ci.yml now runs `rustup self uninstall -y || true` before `nix develop .#guest`,
+  so aya-build falls back to the flake nightly (matching the LLVM-22 bpf-linker).
+- GOTCHA recorded: do NOT install rustup in the guest; it shadows the flake nightly.

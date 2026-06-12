@@ -252,6 +252,11 @@ classic "forgot the null check" rejection cannot occur through it.)
   shell. See `docs/spike-notes.md`.
 - **Permission denied loading the program:** the loader must run as root. `cargo run`
   already wraps in `sudo -E` via `.cargo/config.toml`.
+- **`error: toolchain 'nightly-...' is not installed`:** `aya-build` uses `rustup` if it
+  finds it on PATH, and then expects a rustup-managed nightly. The Nix guest has no
+  rustup, so it correctly uses the flake's nightly. Do NOT install rustup in the guest;
+  if one leaked onto PATH, remove it (`rustup self uninstall -y`). (This is also why CI
+  removes rustup before building.)
 - **No trace output:** read the pipe as root: `sudo cat /sys/kernel/tracing/trace_pipe`.
 - **A step branch misbehaves:** `git switch step-N` for a known-good checkpoint; CI builds
   every branch so they should always compile.
