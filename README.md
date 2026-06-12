@@ -51,13 +51,24 @@ repo somewhere under your home directory so the guest's mount can see it.
 ## Editor autocomplete on your laptop (optional)
 
 You can't *build* this project on macOS (the eBPF toolchain is Linux-only), but you can
-still get rust-analyzer language features on your host. Get the host toolchain:
+still get rust-analyzer language features on your host. `nix develop` already gives the
+right toolchain per platform (editing tools on macOS, the full build toolchain on Linux),
+so your editor just needs to see it on `PATH`. Two ways:
 
+**A. Launch your editor from the shell** (simplest; quit it first so it doesn't reattach
+with the old environment):
 ```bash
-nix develop .#analyzer    # nightly + rust-src + rust-analyzer (no build needed)
+cd <repo>
+nix develop          # rust + rust-src + rust-analyzer (instant on macOS, no bpf-linker)
+zed .                # or: code .  /  nvim  /  $EDITOR
 ```
 
-Launch your editor from that shell (or use direnv) so it finds the toolchain. Then:
+**B. direnv (automatic).** A committed `.envrc` loads the toolchain whenever you enter the
+repo: `nix profile install nixpkgs#direnv nixpkgs#nix-direnv`, hook it into your shell,
+then `direnv allow`. (A GUI editor opened from the dock has a minimal `PATH` and may not
+find `direnv`; launching from a terminal avoids that.)
+
+With the toolchain on PATH:
 
 - **Completion, hover, go-to-definition** work immediately (rust-analyzer indexes the
   project with `cargo metadata`, which runs fine on any OS).
