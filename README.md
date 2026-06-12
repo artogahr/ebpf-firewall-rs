@@ -45,8 +45,9 @@ one branch at a time; if you fall behind, check out the next step's branch and r
 - [x] **Step 3 (`step-3`): Read the destination** IP and port.
 - [x] **Step 4 (`step-4`): Share state with a map.** Userspace pushes a PID
   onto a blocklist; the kernel logs when a blocked PID connects (no blocking yet).
-- [x] **Step 5 (`step-5`, you are here): The kill switch.** Deny connections from blocked PIDs.
-- [ ] **Step 6 / `solution`: IPv6 and polish.**
+- [x] **Step 5 (`step-5`): The kill switch.** Deny connections from blocked PIDs.
+- [x] **Step 6 / `solution` (you are here): IPv6 and polish.** A `connect6` hook shares
+  the blocklist so IPv6-capable apps cannot bypass the rule.
 
 ## Step 0 check
 

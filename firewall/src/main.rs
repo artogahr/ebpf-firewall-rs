@@ -28,6 +28,11 @@ async fn main() -> anyhow::Result<()> {
     program.load()?;
     program.attach(&cgroup, CgroupAttachMode::Single)?;
 
+    // Also attach the IPv6 hook so IPv6-capable apps cannot bypass the rule.
+    let program6: &mut CgroupSockAddr = ebpf.program_mut("connect6").unwrap().try_into()?;
+    program6.load()?;
+    program6.attach(&cgroup, CgroupAttachMode::Single)?;
+
     println!("firewall attached. Press Ctrl-C to exit.");
     signal::ctrl_c().await?;
     Ok(())

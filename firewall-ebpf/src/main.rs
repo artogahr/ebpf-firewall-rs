@@ -11,15 +11,24 @@ use aya_ebpf::{
 #[map]
 static BLOCKLIST: HashMap<u32, u8> = HashMap::with_max_entries(1024, 0);
 
+// Shared decision for both IPv4 and IPv6 connect attempts.
+fn decide() -> i32 {
+    let pid = (bpf_get_current_pid_tgid() >> 32) as u32;
+    if unsafe { BLOCKLIST.get(&pid) }.is_some() {
+        unsafe { bpf_printk!(c"connect: BLOCKING pid %d", pid) };
+        return 0; // deny
+    }
+    1 // allow
+}
+
 #[cgroup_sock_addr(connect4)]
 pub fn connect4(_ctx: SockAddrContext) -> i32 {
-    let pid = (bpf_get_current_pid_tgid() >> 32) as u32;
+    decide()
+}
 
-    if unsafe { BLOCKLIST.get(&pid) }.is_some() {
-        unsafe { bpf_printk!(c"connect4: BLOCKING pid %d", pid) };
-        return 0; // 0 = deny the connect() call
-    }
-    1 // allow everyone else
+#[cgroup_sock_addr(connect6)]
+pub fn connect6(_ctx: SockAddrContext) -> i32 {
+    decide()
 }
 
 #[cfg(not(test))]
