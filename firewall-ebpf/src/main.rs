@@ -8,7 +8,6 @@ use aya_ebpf::{
     programs::SockAddrContext,
 };
 
-// PIDs userspace has asked us to block. Value is unused (just membership).
 #[map]
 static BLOCKLIST: HashMap<u32, u8> = HashMap::with_max_entries(1024, 0);
 
@@ -17,9 +16,10 @@ pub fn connect4(_ctx: SockAddrContext) -> i32 {
     let pid = (bpf_get_current_pid_tgid() >> 32) as u32;
 
     if unsafe { BLOCKLIST.get(&pid) }.is_some() {
-        unsafe { bpf_printk!(c"connect4: pid %d is on the blocklist (allowing for now)", pid) };
+        unsafe { bpf_printk!(c"connect4: BLOCKING pid %d", pid) };
+        return 0; // 0 = deny the connect() call
     }
-    1 // still allow; Step 5 turns this into a deny
+    1 // allow everyone else
 }
 
 #[cfg(not(test))]

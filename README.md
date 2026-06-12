@@ -43,9 +43,9 @@ one branch at a time; if you fall behind, check out the next step's branch and r
   and log every connection attempt.
 - [x] **Step 2 (`step-2`): Read the PID** of the process making the connection.
 - [x] **Step 3 (`step-3`): Read the destination** IP and port.
-- [x] **Step 4 (`step-4`, you are here): Share state with a map.** Userspace pushes a PID
+- [x] **Step 4 (`step-4`): Share state with a map.** Userspace pushes a PID
   onto a blocklist; the kernel logs when a blocked PID connects (no blocking yet).
-- [ ] **Step 5 (`step-5`): The kill switch.** Deny connections from blocked PIDs.
+- [x] **Step 5 (`step-5`, you are here): The kill switch.** Deny connections from blocked PIDs.
 - [ ] **Step 6 / `solution`: IPv6 and polish.**
 
 ## Step 0 check
