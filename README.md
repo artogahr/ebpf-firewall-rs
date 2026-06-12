@@ -51,11 +51,10 @@ one branch at a time; if you fall behind, check out the next step's branch and r
 ## Step 0 check
 
 Open the guest from the repo directory (the shell lands in the same directory inside
-the guest), and enter the dev shell once so `cargo` and the toolchain are on PATH:
+the guest, with `cargo` and the toolchain already on PATH):
 
 ```bash
-nix run .#enter      # shell into the guest
-nix develop          # enter the dev shell (cargo, the eBPF toolchain, etc.)
+nix run .#enter      # shell into the guest, already in the dev shell
 cargo run            # builds the program and loads it into the kernel
 ```
 

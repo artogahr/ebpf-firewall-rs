@@ -48,17 +48,17 @@ by adding the TC packet-drop stretch (see the design spec).
 
 You start each step on the previous branch and type only the small diff (see the
 "Live-coding cheat" below for the exact lines). If you fall behind or a demo breaks,
-`git switch step-N` jumps to a known-good checkpoint. Enter the dev shell once, then the
-commands are short and Nix-native:
+`git switch step-N` jumps to a known-good checkpoint. `nix run .#enter` drops you
+straight into the dev shell (cargo + toolchain ready), so the commands are short:
 
 ```bash
-nix run .#enter        # shell into the guest (from the repo dir)
-nix develop            # enter the dev shell once: cargo + toolchain on PATH
+nix run .#enter        # shell into the guest, already in the dev shell (from repo dir)
 cargo build            # build
 cargo run -- 1234      # load (auto-sudo via .cargo/config); 1234 = PID to block
 ```
 
-Keep a second `nix run .#enter` shell open for `sudo cat /sys/kernel/tracing/trace_pipe`.
+Keep a second `nix run .#enter` shell open for `sudo cat /sys/kernel/tracing/trace_pipe`
+(sudo and curl are on PATH in the dev shell too).
 
 ## Live-coding cheat: the exact delta per step
 
