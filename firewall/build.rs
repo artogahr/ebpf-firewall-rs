@@ -2,6 +2,17 @@ use anyhow::{Context as _, anyhow};
 use aya_build::Toolchain;
 
 fn main() -> anyhow::Result<()> {
+    // Host-side analysis (rust-analyzer) can't build the eBPF object on a host without
+    // bpf-linker (e.g. macOS). With AYA_BUILD_SKIP=1, write an empty stub so the
+    // `include_bytes_aligned!` in main.rs resolves and `cargo check` succeeds for editor
+    // language features. The real guest build leaves AYA_BUILD_SKIP unset and builds for real.
+    if std::env::var_os("AYA_BUILD_SKIP").is_some() {
+        let out_dir = std::env::var("OUT_DIR").context("OUT_DIR not set")?;
+        std::fs::write(std::path::Path::new(&out_dir).join("firewall"), [])
+            .context("writing eBPF stub for AYA_BUILD_SKIP")?;
+        return Ok(());
+    }
+
     let cargo_metadata::Metadata { packages, .. } = cargo_metadata::MetadataCommand::new()
         .no_deps()
         .exec()
