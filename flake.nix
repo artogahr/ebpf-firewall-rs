@@ -28,7 +28,7 @@
         # default bpf-linker links LLVM 21, but the current nightly bundles LLVM 22,
         # which produces "ERROR llvm: Invalid record" at link time. Pin bpf-linker to
         # LLVM 22 to match. (If a future nightly bumps to LLVM 23, bump this too.)
-        bpfLinker = pkgs.bpf-linker.override { llvmPackages = pkgs.llvmPackages_22; };
+        bpfLinker = pkgs.bpf-linker.override { llvmPackagesForLinker = pkgs.llvmPackages_22; };
 
         # Host shell (laptop, macOS or Linux): the tools to launch the guest.
         hostShell = pkgs.mkShell {
