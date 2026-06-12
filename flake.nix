@@ -23,6 +23,13 @@
             extensions = [ "rust-src" "rustfmt" "clippy" ];
           });
 
+        # bpf-linker reads the LLVM bitcode that rustc emits, so it MUST be built
+        # against the same LLVM major version as the nightly toolchain. The nixpkgs
+        # default bpf-linker links LLVM 21, but the current nightly bundles LLVM 22,
+        # which produces "ERROR llvm: Invalid record" at link time. Pin bpf-linker to
+        # LLVM 22 to match. (If a future nightly bumps to LLVM 23, bump this too.)
+        bpfLinker = pkgs.bpf-linker.override { llvmPackages = pkgs.llvmPackages_22; };
+
         # Host shell (laptop, macOS or Linux): the tools to launch the guest.
         hostShell = pkgs.mkShell {
           packages = [ pkgs.lima ];
@@ -36,8 +43,8 @@
         guestShell = pkgs.mkShell {
           packages = [
             rustNightly
-            pkgs.bpf-linker
-            pkgs.llvmPackages.clang
+            bpfLinker
+            pkgs.llvmPackages_22.clang
             pkgs.pkg-config
           ];
         };
