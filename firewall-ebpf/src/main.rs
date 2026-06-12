@@ -3,24 +3,23 @@
 
 use aya_ebpf::{
     helpers::{bpf_get_current_pid_tgid, bpf_printk},
-    macros::cgroup_sock_addr,
+    macros::{cgroup_sock_addr, map},
+    maps::HashMap,
     programs::SockAddrContext,
 };
 
+// PIDs userspace has asked us to block. Value is unused (just membership).
+#[map]
+static BLOCKLIST: HashMap<u32, u8> = HashMap::with_max_entries(1024, 0);
+
 #[cgroup_sock_addr(connect4)]
-pub fn connect4(ctx: SockAddrContext) -> i32 {
+pub fn connect4(_ctx: SockAddrContext) -> i32 {
     let pid = (bpf_get_current_pid_tgid() >> 32) as u32;
 
-    // The connect target lives in the program context. user_ip4 and user_port are
-    // in network byte order; we print them raw here and decode them in the slides.
-    let sa = unsafe { &*ctx.sock_addr };
-    let dest_ip = u32::from_be(sa.user_ip4);
-    let dest_port = u16::from_be(sa.user_port as u16);
-
-    unsafe {
-        bpf_printk!(c"connect4: pid %d -> ip %x port %d", pid, dest_ip, dest_port as u32)
-    };
-    1 // allow
+    if unsafe { BLOCKLIST.get(&pid) }.is_some() {
+        unsafe { bpf_printk!(c"connect4: pid %d is on the blocklist (allowing for now)", pid) };
+    }
+    1 // still allow; Step 5 turns this into a deny
 }
 
 #[cfg(not(test))]
