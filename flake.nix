@@ -58,6 +58,10 @@
         devShells.default = guestShell;
         devShells.host = hostShell;
         devShells.guest = guestShell;
+        # Lean host toolchain (nightly + rust-src + rust-analyzer) for editor language
+        # features on the host (e.g. macOS), where the project cannot be built but CAN be
+        # analyzed and cross-checked. See the README "Editor autocomplete" section.
+        devShells.analyzer = pkgs.mkShell { packages = [ rustNightly ]; };
 
         # VM lifecycle as flake apps, so the host commands are pure Nix:
         #   nix run .#start    boot the guest

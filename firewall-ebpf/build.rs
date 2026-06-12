@@ -12,6 +12,10 @@ use which::which;
 ///
 /// [bindeps]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html?highlight=feature#artifact-dependencies
 fn main() {
-    let bpf_linker = which("bpf-linker").unwrap();
-    println!("cargo:rerun-if-changed={}", bpf_linker.to_str().unwrap());
+    // bpf-linker is only needed to *build* the eBPF object, not to `cargo check` or run
+    // `cargo metadata`. On a dev host without it (e.g. macOS), skip gracefully so editors
+    // and rust-analyzer can still analyze the crate instead of panicking here.
+    if let Ok(bpf_linker) = which("bpf-linker") {
+        println!("cargo:rerun-if-changed={}", bpf_linker.to_str().unwrap());
+    }
 }
