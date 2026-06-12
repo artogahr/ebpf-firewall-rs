@@ -22,6 +22,14 @@ runnable/observable steps, each introducing exactly one new concept, so particip
 understand how they arrived at the end product. Guiding arc:
 **see the hook fire, read data, store data, enforce.** Observe before you act.
 
+**Live-coding principle (drives all step code):** the instructor types the code LIVE on
+stage, so the hand-written lines per step must be minimal and easy to understand in real
+time. Therefore: all boilerplate (loader ceremony, imports, rlimit, logger setup) is
+pre-staged in each step's starting branch; the live diff per step is only the few
+meaningful eBPF lines that ARE the lesson. Even pre-staged code is trimmed for
+readability (no scaffold indirection like `match try_x()` wrappers). Each step's live
+diff should be small enough to project and read.
+
 ## Core constraint that shapes everything
 
 **eBPF only exists in the Linux kernel. macOS has no eBPF subsystem.** Nix gives
