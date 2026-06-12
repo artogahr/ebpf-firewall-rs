@@ -32,22 +32,6 @@ repo; everything else, including the VM runner, comes from the flake.
 3. **Confirm it works** with the Step 0 check below. If you see the hello line, you are
    ready.
 
-## How you'll work: edit on your laptop, build in the guest
-
-Your code lives on your laptop (you cloned it there), and the guest mounts your home
-directory, so your edits show up inside the guest instantly. The loop is:
-
-1. **Edit** `firewall-ebpf/src/main.rs` (the kernel program) and `firewall/src/main.rs`
-   (the loader) with your normal editor on your laptop. (Prefer to stay in the terminal?
-   `vim` and `nano` are installed in the guest.)
-2. **Build and run inside the guest**, where the Linux eBPF toolchain lives:
-   `nix run .#enter`, then `cargo run`.
-3. **Watch** the result in the kernel trace pipe (a second `nix run .#enter` shell:
-   `sudo cat /sys/kernel/tracing/trace_pipe`).
-
-So: edit on your laptop, `cargo run` in the guest, watch the trace pipe. Note: clone the
-repo somewhere under your home directory so the guest's mount can see it.
-
 ## The workshop, step by step
 
 Each step is a git branch. Start on `main` (Step 0) and move up the ladder one branch at
