@@ -37,10 +37,10 @@ repo; everything else, including the VM runner, comes from the flake.
 Each step is a git branch. You are on `main` now, which is Step 0. Move up the ladder
 one branch at a time; if you fall behind, check out the next step's branch and rejoin.
 
-- [x] **Step 0 (`main`, you are here): Hello eBPF.** Load a program and watch it react
+- [x] **Step 0 (`main`): Hello eBPF.** Load a program and watch it react
   to the kernel. Proves your toolchain works.
-- [ ] **Step 1 (`step-1`): Catch the hook.** Attach to `cgroup/connect4` and log every
-  connection attempt.
+- [x] **Step 1 (`step-1`, you are here): Catch the hook.** Attach to `cgroup/connect4`
+  and log every connection attempt.
 - [ ] **Step 2 (`step-2`): Read the PID** of the process making the connection.
 - [ ] **Step 3 (`step-3`): Read the destination** IP and port.
 - [ ] **Step 4 (`step-4`): Share state with a map.** Userspace pushes a PID onto a
