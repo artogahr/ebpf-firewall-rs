@@ -59,12 +59,16 @@ Run `git branch --show-current` if you lose track of where you are.
   Proves your toolchain works.
 - **Step 1 (`step-1`): Catch the hook.** Attach to `cgroup/connect4` and log every
   connection attempt.
-- **Step 2 (`step-2`): Read the PID** of the process making the connection.
-- **Step 3 (`step-3`): Read the destination** IP and port.
-- **Step 4 (`step-4`): Share state with a map.** Userspace pushes a PID onto a
-  blocklist; the kernel logs when a blocked PID connects (no blocking yet).
-- **Step 5 (`step-5`): The kill switch.** Deny connections from blocked PIDs.
-- **Step 6 (`step-6` / `solution`): IPv6 and polish.**
+- **Step 2 (`step-2`): Read *who*.** The name of the process connecting
+  (`bpf_get_current_comm`).
+- **Step 3 (`step-3`): Read *where*.** The destination IP and port.
+- **Step 4 (`step-4`): Share state with a map.** Userspace pushes a process name onto a
+  blocklist; the kernel logs when a blocked name connects (no blocking yet).
+- **Step 5 (`step-5`): Kill switch by name.** Deny connections from blocked programs
+  (`block curl` → curl can't reach the network, anything else can).
+- **Step 6 (`step-6`): Kill switch by destination.** Also deny connections to blocked
+  IPs (`block 1.1.1.1` → no one reaches it, other addresses still work).
+- **Step 7 (`step-7` / `solution`): IPv6.** Apply the same rules to IPv6 connects.
 
 ## Step 0 check
 
