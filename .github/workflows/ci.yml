@@ -18,4 +18,10 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Build the workspace with the guest dev shell
-        run: nix develop .#guest --command cargo build --locked
+        run: |
+          # aya-build prefers a rustup-managed nightly when `rustup` is on PATH.
+          # GitHub runners ship rustup; remove it so aya-build falls back to the
+          # flake's pinned nightly (which matches the flake's LLVM-22 bpf-linker),
+          # exactly like the rustup-free Nix guest that participants use.
+          rustup self uninstall -y || true
+          nix develop .#guest --command cargo build --locked
