@@ -76,7 +76,11 @@
         apps.enter = {
           type = "app";
           program = toString (pkgs.writeShellScript "enter" ''
-            exec ${pkgs.lima}/bin/limactl shell workshop "$@"
+            # Drop straight into the dev shell inside the guest, so cargo and the
+            # toolchain are ready immediately (no separate `nix develop` step).
+            # sudo and curl stay on PATH, so this shell works for building, running,
+            # reading the trace pipe, and triggering connections.
+            exec ${pkgs.lima}/bin/limactl shell workshop -- nix develop "$@"
           '');
         };
         apps.stop = {
