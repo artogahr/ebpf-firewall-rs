@@ -13,16 +13,18 @@ async fn main() -> anyhow::Result<()> {
         "/firewall"
     )))?;
 
-    // Seed the blocklist with the PIDs passed on the command line.
-    let mut blocklist: HashMap<_, u32, u8> =
-        HashMap::try_from(ebpf.map_mut("BLOCKLIST").unwrap())?;
+    // Seed the blocklist with the process names passed on the command line.
+    let mut names: HashMap<_, [u8; 16], u8> =
+        HashMap::try_from(ebpf.map_mut("BLOCKED_NAMES").unwrap())?;
     for arg in std::env::args().skip(1) {
-        let pid: u32 = arg.parse()?;
-        blocklist.insert(pid, 0, 0)?;
-        println!("blocking PID {pid}");
+        let mut key = [0u8; 16];
+        let bytes = arg.as_bytes();
+        let n = bytes.len().min(15);
+        key[..n].copy_from_slice(&bytes[..n]);
+        names.insert(key, 0, 0)?;
+        println!("blocking process name: {arg}");
     }
 
-    // Attach to the root cgroup v2, so the hook sees every process on the system.
     let cgroup = File::open("/sys/fs/cgroup")?;
     let program: &mut CgroupSockAddr = ebpf.program_mut("connect4").unwrap().try_into()?;
     program.load()?;
