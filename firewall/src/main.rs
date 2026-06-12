@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::net::Ipv4Addr;
 
 use aya::maps::HashMap;
 use aya::programs::{CgroupAttachMode, CgroupSockAddr};
@@ -13,25 +14,42 @@ async fn main() -> anyhow::Result<()> {
         "/firewall"
     )))?;
 
-    // Seed the blocklist with the PIDs passed on the command line.
-    let mut blocklist: HashMap<_, u32, u8> =
-        HashMap::try_from(ebpf.map_mut("BLOCKLIST").unwrap())?;
+    // Each argument is either an IPv4 address (block that destination) or a process
+    // name (block that program).
+    let mut block_names: Vec<[u8; 16]> = Vec::new();
+    let mut block_ips: Vec<u32> = Vec::new();
     for arg in std::env::args().skip(1) {
-        let pid: u32 = arg.parse()?;
-        blocklist.insert(pid, 0, 0)?;
-        println!("blocking PID {pid}");
+        if let Ok(ip) = arg.parse::<Ipv4Addr>() {
+            block_ips.push(u32::from(ip));
+            println!("blocking destination IP: {ip}");
+        } else {
+            let mut key = [0u8; 16];
+            let bytes = arg.as_bytes();
+            let n = bytes.len().min(15);
+            key[..n].copy_from_slice(&bytes[..n]);
+            block_names.push(key);
+            println!("blocking process name: {arg}");
+        }
+    }
+    {
+        let mut names: HashMap<_, [u8; 16], u8> =
+            HashMap::try_from(ebpf.map_mut("BLOCKED_NAMES").unwrap())?;
+        for key in &block_names {
+            names.insert(key, 0, 0)?;
+        }
+    }
+    {
+        let mut ips: HashMap<_, u32, u8> =
+            HashMap::try_from(ebpf.map_mut("BLOCKED_IPS").unwrap())?;
+        for ip in &block_ips {
+            ips.insert(ip, 0, 0)?;
+        }
     }
 
-    // Attach to the root cgroup v2, so the hook sees every process on the system.
     let cgroup = File::open("/sys/fs/cgroup")?;
     let program: &mut CgroupSockAddr = ebpf.program_mut("connect4").unwrap().try_into()?;
     program.load()?;
     program.attach(&cgroup, CgroupAttachMode::Single)?;
-
-    // Also attach the IPv6 hook so IPv6-capable apps cannot bypass the rule.
-    let program6: &mut CgroupSockAddr = ebpf.program_mut("connect6").unwrap().try_into()?;
-    program6.load()?;
-    program6.attach(&cgroup, CgroupAttachMode::Single)?;
 
     println!("firewall attached. Press Ctrl-C to exit.");
     signal::ctrl_c().await?;
