@@ -1,0 +1,39 @@
+# Lima config for the eBPF workshop guest.
+#
+# Boots a pinned NixOS image (nixos-lima v0.2, kernel 7.0.10, BTF + cgroup v2) and
+# mounts your home directory writable so the repo (wherever you cloned it) is editable
+# and `cargo build` can write its target/ in place.
+#
+# Boot it with:  nix run .#start   (which runs `limactl start ./workshop.yaml`)
+# The instance is named "workshop" after this file; `nix run .#enter` shells in.
+#
+# vmType is intentionally unset: macOS uses the fast vz backend, Linux uses qemu.
+
+# Pinned images (both arches) so every participant gets the byte-identical guest.
+images:
+- location: "https://github.com/nixos-lima/nixos-lima/releases/download/v0.2/nixos-lima-v0.2-aarch64.qcow2"
+  arch: "aarch64"
+  digest: "sha512:dc297799d93f0fe6cb8fac779b97bb5e2712f0dd640eed53cc57d9c95844751a32d20ce794751fb56c128b35fe8a8a956cd08856b8818e9e6c377380d6f0cc4f"
+- location: "https://github.com/nixos-lima/nixos-lima/releases/download/v0.2/nixos-lima-v0.2-x86_64.qcow2"
+  arch: "x86_64"
+  digest: "sha512:d6fcda5100a9485d9203f084a64d8585ad75543957922144e7a2d84d779cff87b642341bb8f49018ec54b82f8f91fc31b74c7432ff2a5247af3e0bcf57ef79ca"
+
+mounts:
+- location: "~"
+  writable: true
+- location: "/tmp/lima"
+  writable: true
+
+memory: 8GiB
+
+portForwards:
+# NixOS-on-Lima quirk: ignore guest UDP 68 so Lima does not intercept host DHCP.
+# https://github.com/nixos-lima/nixos-lima/issues/50
+- proto: udp
+  guestPort: 68
+  guestIP: 0.0.0.0
+  ignore: true
+
+containerd:
+  system: false
+  user: false
