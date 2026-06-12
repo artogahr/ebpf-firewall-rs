@@ -34,54 +34,48 @@ repo; everything else, including the VM runner, comes from the flake.
 
 ## The workshop, step by step
 
-Each step is a git branch. You are on `main` now, which is Step 0. Move up the ladder
-one branch at a time; if you fall behind, check out the next step's branch and rejoin.
+Each step is a git branch. Start on `main` (Step 0) and move up the ladder one branch at
+a time with `git switch step-N`; if you fall behind, check out the next step and rejoin.
+Run `git branch --show-current` if you lose track of where you are.
 
-- [x] **Step 0 (`main`): Hello eBPF.** Load a program and watch it react
-  to the kernel. Proves your toolchain works.
-- [x] **Step 1 (`step-1`, you are here): Catch the hook.** Attach to `cgroup/connect4`
-  and log every connection attempt.
-- [ ] **Step 2 (`step-2`): Read the PID** of the process making the connection.
-- [ ] **Step 3 (`step-3`): Read the destination** IP and port.
-- [ ] **Step 4 (`step-4`): Share state with a map.** Userspace pushes a PID onto a
+- **Step 0 (`main`): Hello eBPF.** Load a program and watch it react to the kernel.
+  Proves your toolchain works.
+- **Step 1 (`step-1`): Catch the hook.** Attach to `cgroup/connect4` and log every
+  connection attempt.
+- **Step 2 (`step-2`): Read the PID** of the process making the connection.
+- **Step 3 (`step-3`): Read the destination** IP and port.
+- **Step 4 (`step-4`): Share state with a map.** Userspace pushes a PID onto a
   blocklist; the kernel logs when a blocked PID connects (no blocking yet).
-- [ ] **Step 5 (`step-5`): The kill switch.** Deny connections from blocked PIDs.
-- [ ] **Step 6 / `solution`: IPv6 and polish.**
+- **Step 5 (`step-5`): The kill switch.** Deny connections from blocked PIDs.
+- **Step 6 (`step-6` / `solution`): IPv6 and polish.**
 
 ## Step 0 check
 
 Open the guest from the repo directory (the shell lands in the same directory inside
-the guest):
+the guest, with `cargo` and the toolchain already on PATH):
 
 ```bash
-nix run .#enter
-nix develop -c bash -c 'RUST_LOG=info cargo run'   # builds, then loads the program
+nix run .#enter      # shell into the guest, already in the dev shell
+cargo run            # builds the program and loads it into the kernel
 ```
 
-Run any command in another terminal (`nix run .#enter` again, then e.g. `ls`). In the
-loader's output you will see, via aya-log:
-
-```
-[INFO  firewall] execve called
-```
-
-The same program also calls `bpf_printk`, the classic kernel logging primitive. To see
-that, watch the kernel trace pipe in a second guest shell while running commands:
+In a second terminal (`nix run .#enter` again), watch the kernel trace pipe while you
+run any command:
 
 ```bash
 sudo cat /sys/kernel/tracing/trace_pipe
-# ...   bpf_trace_printk: hello from eBPF: execve called
+# ...   bpf_trace_printk: hello from eBPF: a process called execve
 ```
 
-Two windows onto the same kernel program: one through your own app (aya-log), one
-through the kernel's built-in trace pipe. Press Ctrl-C to stop the loader.
+Every command you run triggers a line, because the program fires on the `execve`
+syscall. Seeing it means your whole toolchain works. Press Ctrl-C to stop the loader.
 
 ## Running this for a crowd?
 
 If you are presenting this to many people at once, a few GB per person over shared wifi
 will hurt. Have everyone do the boot step above as homework, and optionally run a local
-Nix binary cache on your laptop so the room pulls over the LAN. See the instructor notes
-for details.
+Nix binary cache on your laptop so the room pulls over the LAN. See
+[`docs/instructor-notes.md`](docs/instructor-notes.md) for details.
 
 ## License
 
