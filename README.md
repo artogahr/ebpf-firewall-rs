@@ -27,7 +27,7 @@ Tip: You need to have free disk space more than 6GB.
    ```bash
    git clone https://github.com/artogahr/ebpf-firewall-rs.git && cd ebpf-firewall-rs
    nix develop          # host toolchain; launch your editor from here for autocomplete
-   # for Linux users without enabled experimental features, you need to use below command
+   # for Linux users without enabled experimental features (happens if you didn't use the Determinate Systems installer and installed Nix from the official source), you need to use below command
    # nix --extra-experimental-features "nix-command flakes" develop
    nix run .#start      # boots the pinned Linux guest (provides Lima for you)
    nix run .#enter      # opens a shell inside the guest
