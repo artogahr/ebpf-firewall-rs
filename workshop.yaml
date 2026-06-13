@@ -26,6 +26,11 @@ mounts:
 
 memory: 8GiB
 
+# Pin DNS to 8.8.8.8 so name resolution works on NixOS hosts (fixes #1) and
+# all participants resolve hostnames to the same IPs (helpful for the IP-blocking steps).
+dns:
+  - 8.8.8.8
+
 portForwards:
 # NixOS-on-Lima quirk: ignore guest UDP 68 so Lima does not intercept host DHCP.
 # https://github.com/nixos-lima/nixos-lima/issues/50
