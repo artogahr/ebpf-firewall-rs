@@ -18,7 +18,7 @@ pub fn connect4(ctx: SockAddrContext) -> i32 {
 
     unsafe {
         bpf_printk!(
-            c"connect4: %s -> ip %x port %d",
+            c"connect4: %s -> ip %x port %x",
             comm.as_ptr() as u64,
             dest_ip,
             dest_port as u32
