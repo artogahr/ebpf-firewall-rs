@@ -51,6 +51,10 @@
             pkgs.llvmPackages_22.clang
             pkgs.pkg-config
           ];
+          shellHook = ''
+            export CARGO_TARGET_DIR=/tmp/ebpf-firewall-rs-target
+            export CARGO_HOME=/tmp/ebpf-firewall-rs
+          '';
         };
 
         # Host editing shell: rust + rust-src + rust-analyzer, no bpf-linker. The project
